@@ -1,0 +1,58 @@
+# Qwerty-fr CP1252 Variant Makefile
+# Target: KBDQWFR.DLL
+# Based from KEYBOARD TABLES Makesfile from WIN3.1 DDK
+
+DLL1 = kbdqwfr.dll
+
+target:  $(DLL1)
+
+# make keyboard table DLL's.
+
+######## main routine for patching tables and copying stuff to driver #####
+
+# All but US version -- X1/X2 swap for AT keyboard.
+
+getkbd.obj: getkbd.asm date.inc
+    masm -DX1X2 getkbd;
+
+######## individual table files. ########
+
+# each one contains tables for several keyboards for one nationality.
+
+INCS=trans.inc keyboard.inc vkoem.inc vkwin.inc
+ASM=masm -I.\
+
+# Qwerty-fr
+kbdqwfr.obj: kbdqwfr.asm $(INCS)
+        $(ASM) kbdqwfr;
+
+
+########### Assemble the key-name tables, for various DLL's #############
+#           Not all DLL's have a GetKeyString() function.
+
+# US/UK: English
+namesus.obj: names.asm namesus.inc trans.inc
+	command /c copy namesus.inc names.inc
+	$(ASM) names, namesus;
+	command /c del names.inc
+
+
+########### Link all the DLL's #############
+
+# Link qwerty-fr DLL
+
+kbdqwfr.dll: kbdqwfr.def getkbd.obj kbdqwfr.obj namesus.obj
+    link getkbd kbdqwfr namesus, kbdqwfr.exe/align:16,kbdqwfr/map, \
+        sdllcew libw /NOD,kbdqwfr.def
+    rc kbdqwfr.exe
+    mapsym kbdqwfr
+    command /c copy kbdqwfr.exe kbdqwfr.dll
+    command /c del kbdqwfr.exe
+
+clean:
+    del kbdqwfr.obj
+    del kbdqwfr.sym
+    del kbdqwfr.map
+    del getkbd.obj
+    del namesus.obj
+    del kbdqwfr.dll

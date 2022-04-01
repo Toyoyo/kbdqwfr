@@ -1,0 +1,4 @@
+Original files are from Win3.1 DDK, (c) Microsoft Corporation.
+Qwerty-fr is covered by GNU/GPL 2.0.
+
+Changes from KBDUS.ASM to KBDQWFR.ASM are to be considered public domain.
